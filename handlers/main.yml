@@ -1,0 +1,8 @@
+---
+- name: Enviar notificacion al telegram sobre el kernel panic sucedido en el servidor.
+  telegram:
+    token: "{{ bot_token }}"
+    api_args:
+      chat_id: "{{ bot_chat_id }}"
+      text: "*!!![ CRITICAL ]!!!* El servidor: *{{ ansible_hostname }}* tuvo un __kernel panic__ hace *{{ tiempo }}* minutos."
+      parse_mode: 'markdown'

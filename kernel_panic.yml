@@ -1,0 +1,34 @@
+---
+- name: Envia notificacion al grupo de Telegram si hubo un kernel panic hoy en los servidores.
+  hosts: all
+  gather_facts: true
+  handlers:
+    - import_tasks: handlers/main.yml
+  vars:
+    messages: /var/log/messages
+  tasks:
+
+  - set_fact:
+      hoy: "{{ lookup('pipe', 'date +\"%b %e\"') }}"
+    tags:
+      - fecha_actual
+
+  - set_fact:
+      tiempo: "{{ (ansible_uptime_seconds/60)|int }}"
+    tags:
+      - uptime_servidor
+
+  - name: Busca eventos de Kernel panic sucedidos hoy.
+    lineinfile:
+      path: "{{ messages }}"
+      regexp: '{{ hoy }}.*Kernel\s+Panic'
+      state: absent
+      backrefs: true
+    check_mode: true
+    register: crash
+    become: true
+    no_log: true
+    notify: "Enviar notificacion al telegram sobre el kernel panic sucedido en el servidor."
+    tags:
+      - valida_panic
+...
